@@ -1,0 +1,7 @@
+{
+    "python.defaultInterpreterPath": "C:\\Users\\mandh\\anaconda3\\envs\\timesync-ai\\python.exe",
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "terminal.integrated.env.windows": {
+        "PATH": "${workspaceFolder}\\.tools\\ffmpeg\\bin;${env:PATH}"
+    }
+}

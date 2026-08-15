@@ -1,0 +1,41 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Python and Conda environments
+.venv/
+venv/
+env/
+.conda/
+
+# Local tools and generated artifacts
+.tools/
+output/*
+!output/.gitkeep
+
+# Local data and model files
+data/*
+!data/.gitkeep
+*.pt
+*.pth
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# IDE and OS files
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
