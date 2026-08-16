@@ -467,7 +467,7 @@ def main() -> None:
         transcript_upload = uploads[1].file_uploader(
             "Timestamp / caption metadata", type=["txt"], help="TimeSync caption metadata format"
         )
-        model = st.selectbox("Whisper model", ("tiny.en", "base.en", "small.en"), index=0)
+        model = st.selectbox("Whisper model", ("tiny.en", "base.en", "small.en"), index=2)
         with st.expander("Advanced options", expanded=False):
             refinement = st.toggle(
                 "Experimental low-energy boundary refinement",

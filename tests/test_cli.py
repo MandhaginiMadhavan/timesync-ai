@@ -29,7 +29,7 @@ def test_cli_builds_default_pipeline_config(monkeypatch, capsys, tmp_path: Path)
 
     assert code == 0
     assert captured["config"].refinement_enabled is False
-    assert captured["config"].whisper_model == "tiny.en"
+    assert captured["config"].whisper_model == "small.en"
     output = capsys.readouterr().out
     assert "14 boundaries, 3 clips, 1 withheld" in output
     assert "12.346s total" in output

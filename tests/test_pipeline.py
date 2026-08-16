@@ -1,6 +1,7 @@
 """Tests for end-to-end orchestration without expensive media operations."""
 
 from dataclasses import replace
+import inspect
 import os
 from pathlib import Path
 
@@ -10,6 +11,14 @@ from src.critic import CriticReasonCode, CriticStatus
 from src.pipeline import PipelineConfig, PipelineError, PipelineServices, run_pipeline
 from src.video_cutter import CutResult, CutStatus, MediaProbe, MediaVerification
 from src.whisper_transcriber import WhisperTranscription, WhisperWord
+from src.whisper_transcriber import transcribe_video
+
+
+def test_production_whisper_defaults_use_small_en() -> None:
+    config = PipelineConfig("video.mp4", "captions.txt", "output")
+
+    assert config.whisper_model == "small.en"
+    assert inspect.signature(transcribe_video).parameters["model_name"].default == "small.en"
 
 
 def input_files(tmp_path: Path) -> tuple[Path, Path]:

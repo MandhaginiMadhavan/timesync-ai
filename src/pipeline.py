@@ -41,7 +41,7 @@ class PipelineConfig:
     video_path: str | Path
     transcript_path: str | Path
     output_directory: str | Path
-    whisper_model: str = "tiny.en"
+    whisper_model: str = "small.en"
     whisper_download_root: str | Path | None = None
     refinement_enabled: bool = False
     resolver_config: ResolverConfig = ResolverConfig()

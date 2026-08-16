@@ -73,7 +73,8 @@ def test_initial_page_has_focused_inputs_and_no_result_sections() -> None:
     assert not page.exception
     assert [button.label for button in page.button] == ["Analyse Video"]
     assert [selector.label for selector in page.selectbox] == ["Whisper model"]
-    assert page.selectbox[0].value == "tiny.en"
+    assert page.selectbox[0].value == "small.en"
+    assert page.selectbox[0].options == ["tiny.en", "base.en", "small.en"]
     assert len(page.get("file_uploader")) == 2
     assert len(page.toggle) == 1
     assert page.toggle[0].label == "Experimental low-energy boundary refinement"

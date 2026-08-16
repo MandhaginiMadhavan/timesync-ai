@@ -33,7 +33,7 @@ class WhisperTranscription:
 def transcribe_video(
     video_path: str | Path,
     *,
-    model_name: str = "tiny.en",
+    model_name: str = "small.en",
     download_root: str | Path | None = None,
 ) -> WhisperTranscription:
     """Transcribe a media file locally and retain word timing probabilities."""

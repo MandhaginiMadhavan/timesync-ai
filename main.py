@@ -17,7 +17,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--transcript", required=True, type=Path, help="caption metadata text file"
     )
     parser.add_argument("--output", required=True, type=Path, help="new output directory")
-    parser.add_argument("--whisper-model", default="tiny.en", help="local Whisper model")
+    parser.add_argument("--whisper-model", default="small.en", help="local Whisper model")
     parser.add_argument(
         "--whisper-download-root", type=Path, help="local Whisper model directory"
     )
