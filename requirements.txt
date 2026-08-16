@@ -1,6 +1,7 @@
 # Direct Python dependencies for TimeSync AI.
 openai-whisper==20250625
 ffmpeg-python==0.2.0
+streamlit==1.49.1
 
 # Development and testing.
 pytest==9.1.1
