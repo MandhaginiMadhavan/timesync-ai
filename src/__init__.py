@@ -55,6 +55,14 @@ from .reporting import (
     report_to_dict,
     write_audit_reports,
 )
+from .pipeline import (
+    ExecutedClip,
+    PipelineConfig,
+    PipelineError,
+    PipelineResult,
+    PipelineServices,
+    run_pipeline,
+)
 from .video_cutter import (
     BoundaryNotApprovedError,
     CutConfig,
@@ -64,8 +72,10 @@ from .video_cutter import (
     CutVerificationError,
     FFmpegExecutionError,
     MediaVerification,
+    MediaProbe,
     VideoCutError,
     cut_video,
+    probe_media,
 )
 
 __all__ = [
@@ -101,7 +111,13 @@ __all__ = [
     "ResolverEvidence",
     "RiskContribution",
     "FFmpegExecutionError",
+    "ExecutedClip",
     "MediaVerification",
+    "MediaProbe",
+    "PipelineConfig",
+    "PipelineError",
+    "PipelineResult",
+    "PipelineServices",
     "STTConfidence",
     "STTTimestamp",
     "TimestampConflict",
@@ -113,11 +129,13 @@ __all__ = [
     "cut_video",
     "detect_timestamp_conflict",
     "refine_boundary",
+    "probe_media",
     "render_json_report",
     "render_markdown_report",
     "report_to_dict",
     "resolve_timestamp",
     "resolver_evidence_for",
+    "run_pipeline",
     "text_alignment_quality",
     "write_audit_reports",
 ]

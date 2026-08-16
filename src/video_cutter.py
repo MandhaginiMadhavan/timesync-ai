@@ -97,7 +97,9 @@ class CutResult:
 
 
 @dataclass(frozen=True, slots=True)
-class _MediaProbe:
+class MediaProbe:
+    """Basic duration and stream information returned by FFprobe."""
+
     duration_seconds: float
     has_video_stream: bool
     has_audio_stream: bool
@@ -128,7 +130,7 @@ def _probe_media(
     *,
     ffprobe_path: str | Path,
     runner: CommandRunner,
-) -> _MediaProbe:
+) -> MediaProbe:
     command = (
         str(ffprobe_path),
         "-v",
@@ -152,10 +154,25 @@ def _probe_media(
         ) from error
     if not math.isfinite(duration) or duration < 0:
         raise CutVerificationError(f"FFprobe returned an invalid duration for {path}")
-    return _MediaProbe(
+    return MediaProbe(
         duration_seconds=duration,
         has_video_stream="video" in stream_types,
         has_audio_stream="audio" in stream_types,
+    )
+
+
+def probe_media(
+    path: str | Path,
+    *,
+    ffprobe_path: str | Path = "ffprobe",
+    runner: CommandRunner | None = None,
+) -> MediaProbe:
+    """Validate a media path and return its FFprobe duration and streams."""
+    source = Path(path)
+    if not source.is_file():
+        raise CutValidationError(f"media file does not exist: {source}")
+    return _probe_media(
+        source, ffprobe_path=ffprobe_path, runner=runner or subprocess.run
     )
 
 
