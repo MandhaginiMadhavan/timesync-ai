@@ -45,6 +45,16 @@ from .resolver import (
     resolve_timestamp,
     text_alignment_quality,
 )
+from .reporting import (
+    REPORT_SCHEMA_VERSION,
+    AuditReport,
+    ReportSummary,
+    build_audit_report,
+    render_json_report,
+    render_markdown_report,
+    report_to_dict,
+    write_audit_reports,
+)
 from .video_cutter import (
     BoundaryNotApprovedError,
     CutConfig,
@@ -60,6 +70,7 @@ from .video_cutter import (
 
 __all__ = [
     "AlignedBoundaryCandidate",
+    "AuditReport",
     "AudioEnergyEvidence",
     "Boundary",
     "BoundaryRefinementError",
@@ -79,6 +90,8 @@ __all__ = [
     "MetadataTimestamp",
     "NeighbourTimestampPair",
     "ReasonCode",
+    "REPORT_SCHEMA_VERSION",
+    "ReportSummary",
     "RefinementConfig",
     "RefinementReason",
     "RefinementValidationStatus",
@@ -95,11 +108,16 @@ __all__ = [
     "TimestampSource",
     "VideoCutError",
     "align_caption_boundaries",
+    "build_audit_report",
     "critique_decisions",
     "cut_video",
     "detect_timestamp_conflict",
     "refine_boundary",
+    "render_json_report",
+    "render_markdown_report",
+    "report_to_dict",
     "resolve_timestamp",
     "resolver_evidence_for",
     "text_alignment_quality",
+    "write_audit_reports",
 ]
