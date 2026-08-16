@@ -13,8 +13,16 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./
-RUN python -m pip install --no-cache-dir --requirement requirements.txt
+COPY requirements-docker.txt ./
+
+# Install the validated CPU-only PyTorch build from PyTorch's official CPU
+# wheel index. Whisper is installed without dependencies so its Linux-only
+# Triton dependency (a CUDA optimization unused on CPU) is not included.
+RUN python -m pip install \
+        --index-url https://download.pytorch.org/whl/cpu \
+        torch==2.13.0+cpu \
+    && python -m pip install --requirement requirements-docker.txt \
+    && python -m pip install --no-deps openai-whisper==20250625
 
 COPY app.py main.py ./
 COPY src/ ./src/
@@ -29,6 +37,6 @@ USER timesync
 EXPOSE 8501
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)" || exit 1
+    CMD python -c "import os, urllib.request; port = os.environ.get('PORT', '8501'); urllib.request.urlopen(f'http://127.0.0.1:{port}/_stcore/health', timeout=3)" || exit 1
 
-CMD ["streamlit", "run", "app.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.headless=true", "--browser.gatherUsageStats=false"]
+CMD ["sh", "-c", "exec streamlit run app.py --server.address=0.0.0.0 --server.port=${PORT:-8501} --server.headless=true --browser.gatherUsageStats=false"]

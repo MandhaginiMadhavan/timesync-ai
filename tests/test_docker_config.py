@@ -11,11 +11,27 @@ def test_dockerfile_has_required_runtime_contract() -> None:
 
     assert dockerfile.startswith("FROM python:3.11-slim")
     assert "apt-get install --yes --no-install-recommends ffmpeg" in dockerfile
-    assert "COPY requirements.txt ./" in dockerfile
+    assert "COPY requirements-docker.txt ./" in dockerfile
+    assert "https://download.pytorch.org/whl/cpu" in dockerfile
+    assert "torch==2.13.0+cpu" in dockerfile
+    assert "--no-deps openai-whisper==20250625" in dockerfile
     assert "EXPOSE 8501" in dockerfile
     assert 'USER timesync' in dockerfile
-    assert '["streamlit", "run", "app.py"' in dockerfile
+    assert "--server.address=0.0.0.0" in dockerfile
+    assert "--server.port=${PORT:-8501}" in dockerfile
     assert "/_stcore/health" in dockerfile
+    assert "os.environ.get('PORT', '8501')" in dockerfile
+
+
+def test_docker_runtime_requirements_exclude_development_and_gpu_packages() -> None:
+    requirements = (ROOT / "requirements-docker.txt").read_text(encoding="utf-8")
+
+    assert "streamlit==1.49.1" in requirements
+    assert "ffmpeg-python==0.2.0" in requirements
+    assert "pytest" not in requirements
+    assert "torch" not in requirements
+    assert "triton" not in requirements
+    assert "nvidia" not in requirements
 
 
 def test_docker_context_excludes_local_and_generated_assets() -> None:

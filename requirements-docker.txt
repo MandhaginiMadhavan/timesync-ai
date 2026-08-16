@@ -1,0 +1,11 @@
+# CPU-only container runtime dependencies. PyTorch is installed separately
+# from its official CPU wheel index in the Dockerfile.
+more-itertools
+numba
+numpy
+tiktoken
+tqdm
+
+# TimeSync AI runtime dependencies.
+ffmpeg-python==0.2.0
+streamlit==1.49.1
