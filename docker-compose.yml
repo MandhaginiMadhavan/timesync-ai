@@ -1,0 +1,16 @@
+services:
+  timesync-ai:
+    build:
+      context: .
+    image: timesync-ai:latest
+    container_name: timesync-ai
+    ports:
+      - "8501:8501"
+    volumes:
+      - whisper-cache:/app/.tools/whisper
+      - timesync-output:/app/output
+    restart: unless-stopped
+
+volumes:
+  whisper-cache:
+  timesync-output:
