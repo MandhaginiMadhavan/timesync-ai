@@ -5,6 +5,15 @@ from .alignment import (
     align_caption_boundaries,
     resolver_evidence_for,
 )
+from .boundary_refinement import (
+    AudioEnergyEvidence,
+    BoundaryRefinementError,
+    BoundaryRefinementResult,
+    RefinementConfig,
+    RefinementReason,
+    RefinementValidationStatus,
+    refine_boundary,
+)
 from .conflicts import (
     DEFAULT_MAJOR_CONFLICT_THRESHOLD_SECONDS,
     detect_timestamp_conflict,
@@ -51,7 +60,10 @@ from .video_cutter import (
 
 __all__ = [
     "AlignedBoundaryCandidate",
+    "AudioEnergyEvidence",
     "Boundary",
+    "BoundaryRefinementError",
+    "BoundaryRefinementResult",
     "BoundaryNotApprovedError",
     "CriticConfig",
     "CriticDiagnostics",
@@ -67,6 +79,9 @@ __all__ = [
     "MetadataTimestamp",
     "NeighbourTimestampPair",
     "ReasonCode",
+    "RefinementConfig",
+    "RefinementReason",
+    "RefinementValidationStatus",
     "ResolverConfig",
     "ResolverDecision",
     "ResolverDiagnostics",
@@ -83,6 +98,7 @@ __all__ = [
     "critique_decisions",
     "cut_video",
     "detect_timestamp_conflict",
+    "refine_boundary",
     "resolve_timestamp",
     "resolver_evidence_for",
     "text_alignment_quality",

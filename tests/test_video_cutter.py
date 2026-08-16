@@ -9,6 +9,11 @@ from typing import Callable
 import pytest
 
 from src import MetadataTimestamp, STTConfidence, STTTimestamp
+from src.boundary_refinement import (
+    BoundaryRefinementResult,
+    RefinementReason,
+    RefinementValidationStatus,
+)
 from src.critic import CriticResult, critique_decisions
 from src.resolver import ResolverEvidence, resolve_timestamp
 from src.video_cutter import (
@@ -87,6 +92,19 @@ def make_input(tmp_path: Path) -> Path:
     return source
 
 
+def refinement(original: float, refined: float) -> BoundaryRefinementResult:
+    return BoundaryRefinementResult(
+        original_selected_timestamp=original,
+        refined_timestamp=refined,
+        adjustment_milliseconds=(refined - original) * 1000,
+        maximum_shift_seconds=0.15,
+        refinement_applied=refined != original,
+        evidence=None,
+        reason=RefinementReason.REFINED_TO_LOW_ENERGY,
+        validation_status=RefinementValidationStatus.VALID,
+    )
+
+
 def test_successful_cut_is_verified_and_structured(tmp_path: Path) -> None:
     source = make_input(tmp_path)
     destination = tmp_path / "output" / "clips" / "clip.mp4"
@@ -101,6 +119,8 @@ def test_successful_cut_is_verified_and_structured(tmp_path: Path) -> None:
     )
 
     assert result.status is CutStatus.SUCCESS
+    assert result.requested_start_seconds == 10.0
+    assert result.requested_end_seconds == 20.0
     assert result.actual_output_duration_seconds == 10.0
     assert result.verification.has_video_stream is True
     assert result.verification.has_audio_stream is True
@@ -110,8 +130,58 @@ def test_successful_cut_is_verified_and_structured(tmp_path: Path) -> None:
         source.resolve()
     )
     assert result.ffmpeg_command.index("-ss") > result.ffmpeg_command.index("-i")
+    assert result.ffmpeg_command[result.ffmpeg_command.index("-ss") + 1] == "10.000000000"
+    assert result.ffmpeg_command[result.ffmpeg_command.index("-t") + 1] == "10.000000000"
     assert result.ffmpeg_command[result.ffmpeg_command.index("-c:v") + 1] == "libx264"
     assert result.ffmpeg_command[result.ffmpeg_command.index("-c:a") + 1] == "aac"
+
+
+def test_valid_refinements_control_execution_timestamps(tmp_path: Path) -> None:
+    source = make_input(tmp_path)
+
+    result = cut_video(
+        source,
+        tmp_path / "output" / "clips" / "clip.mp4",
+        approved_boundary(10.0),
+        approved_boundary(20.0),
+        start_refinement=refinement(10.0, 10.1),
+        end_refinement=refinement(20.0, 19.9),
+        config=config_for(tmp_path),
+        runner=fake_runner(output_duration=9.8),
+    )
+
+    assert result.requested_start_seconds == 10.1
+    assert result.requested_end_seconds == 19.9
+
+
+def test_refinement_must_match_semantic_timestamp(tmp_path: Path) -> None:
+    source = make_input(tmp_path)
+
+    with pytest.raises(CutValidationError, match="does not match"):
+        cut_video(
+            source,
+            tmp_path / "output" / "clips" / "clip.mp4",
+            approved_boundary(10.0),
+            approved_boundary(20.0),
+            start_refinement=refinement(11.0, 11.1),
+            config=config_for(tmp_path),
+            runner=fake_runner(),
+        )
+
+
+def test_refinement_cannot_exceed_its_declared_limit(tmp_path: Path) -> None:
+    source = make_input(tmp_path)
+
+    with pytest.raises(CutValidationError, match="exceeds"):
+        cut_video(
+            source,
+            tmp_path / "output" / "clips" / "clip.mp4",
+            approved_boundary(10.0),
+            approved_boundary(20.0),
+            start_refinement=refinement(10.0, 10.2),
+            config=config_for(tmp_path),
+            runner=fake_runner(),
+        )
 
 
 def test_human_review_boundary_is_never_executed(tmp_path: Path) -> None:

@@ -10,6 +10,10 @@ from pathlib import Path
 import subprocess
 from typing import Callable, Sequence
 
+from .boundary_refinement import (
+    BoundaryRefinementResult,
+    RefinementValidationStatus,
+)
 from .critic import CriticResult, CriticStatus
 
 
@@ -166,6 +170,52 @@ def _approved_timestamp(boundary: CriticResult, label: str) -> float:
     return timestamp
 
 
+def _execution_timestamp(
+    semantic_timestamp: float,
+    refinement: BoundaryRefinementResult | None,
+    label: str,
+) -> float:
+    if refinement is None:
+        return semantic_timestamp
+    if refinement.validation_status is not RefinementValidationStatus.VALID:
+        raise BoundaryNotApprovedError(
+            f"{label} refinement is not approved for execution"
+        )
+    if refinement.original_selected_timestamp is None or not math.isclose(
+        refinement.original_selected_timestamp,
+        semantic_timestamp,
+        rel_tol=0.0,
+        abs_tol=1e-9,
+    ):
+        raise CutValidationError(
+            f"{label} refinement does not match the Critic-approved timestamp"
+        )
+    refined = refinement.refined_timestamp
+    if refined is None or not math.isfinite(refined):
+        raise CutValidationError(f"{label} refinement has no finite timestamp")
+    maximum_shift = refinement.maximum_shift_seconds
+    if not math.isfinite(maximum_shift) or maximum_shift < 0:
+        raise CutValidationError(f"{label} refinement has an invalid shift limit")
+    adjustment = refined - semantic_timestamp
+    if abs(adjustment) > maximum_shift + 1e-9:
+        raise CutValidationError(
+            f"{label} refinement exceeds its configured shift limit"
+        )
+    if not math.isclose(
+        refinement.adjustment_milliseconds,
+        adjustment * 1000,
+        rel_tol=0.0,
+        abs_tol=1e-6,
+    ):
+        raise CutValidationError(f"{label} refinement adjustment is inconsistent")
+    was_adjusted = not math.isclose(
+        refined, semantic_timestamp, rel_tol=0.0, abs_tol=1e-9
+    )
+    if refinement.refinement_applied is not was_adjusted:
+        raise CutValidationError(f"{label} refinement applied flag is inconsistent")
+    return refined
+
+
 def _safe_output_path(
     input_path: Path,
     output_path: Path,
@@ -189,13 +239,17 @@ def cut_video(
     start_boundary: CriticResult,
     end_boundary: CriticResult,
     *,
+    start_refinement: BoundaryRefinementResult | None = None,
+    end_refinement: BoundaryRefinementResult | None = None,
     config: CutConfig | None = None,
     runner: CommandRunner | None = None,
 ) -> CutResult:
     """Cut original media between two independently approved boundaries.
 
-    Video and the original soundtrack are decoded from the source and encoded
-    into the output. No Whisper-derived or enhanced audio is introduced.
+    By default, the exact Resolver-selected timestamps are used. Experimental
+    execution refinements apply only when explicitly supplied. Video and the
+    original soundtrack are decoded from the source and encoded into the
+    output; no Whisper-derived or enhanced audio is introduced.
     """
     config = config or CutConfig()
     runner = runner or subprocess.run
@@ -203,8 +257,10 @@ def cut_video(
     if not source.is_file():
         raise CutValidationError(f"input video does not exist: {source}")
 
-    start = _approved_timestamp(start_boundary, "start")
-    end = _approved_timestamp(end_boundary, "end")
+    semantic_start = _approved_timestamp(start_boundary, "start")
+    semantic_end = _approved_timestamp(end_boundary, "end")
+    start = _execution_timestamp(semantic_start, start_refinement, "start")
+    end = _execution_timestamp(semantic_end, end_refinement, "end")
     if start < 0:
         raise CutValidationError("start timestamp must be non-negative")
     if end <= start:
