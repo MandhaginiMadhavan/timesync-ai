@@ -9,6 +9,15 @@ from .conflicts import (
     DEFAULT_MAJOR_CONFLICT_THRESHOLD_SECONDS,
     detect_timestamp_conflict,
 )
+from .critic import (
+    CriticConfig,
+    CriticDiagnostics,
+    CriticReasonCode,
+    CriticResult,
+    CriticStatus,
+    RiskContribution,
+    critique_decisions,
+)
 from .models import (
     Boundary,
     MetadataTimestamp,
@@ -31,6 +40,11 @@ from .resolver import (
 __all__ = [
     "AlignedBoundaryCandidate",
     "Boundary",
+    "CriticConfig",
+    "CriticDiagnostics",
+    "CriticReasonCode",
+    "CriticResult",
+    "CriticStatus",
     "DEFAULT_MAJOR_CONFLICT_THRESHOLD_SECONDS",
     "MetadataTimestamp",
     "NeighbourTimestampPair",
@@ -39,11 +53,13 @@ __all__ = [
     "ResolverDecision",
     "ResolverDiagnostics",
     "ResolverEvidence",
+    "RiskContribution",
     "STTConfidence",
     "STTTimestamp",
     "TimestampConflict",
     "TimestampSource",
     "align_caption_boundaries",
+    "critique_decisions",
     "detect_timestamp_conflict",
     "resolve_timestamp",
     "resolver_evidence_for",
